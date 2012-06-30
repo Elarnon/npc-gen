@@ -162,13 +162,13 @@ defaultLang :: Set Language
 defaultLang = Set.empty
 
 raceSize :: Race -> Size
-raceSize = error "raceSize"
+raceSize = error "raceSize: not implemented yet"
 
 raceAdjust :: [(Archetype g, Rational)] -> Race -> Character m -> Character m
-raceAdjust = error "raceAdjust"
+raceAdjust = error "raceAdjust: not implemented yet"
 
 getCharacterLevel :: Character m -> m Integer
-getCharacterLevel = error "getCharacterLevel"
+getCharacterLevel = error "getCharacterLevel: not implemented yet"
 
 createCharacter archetypes base lvl =
   -- Pick random "level-0" values
@@ -222,7 +222,7 @@ nbTry :: Integer
 nbTry = 5
 
 addFeat :: [(Archetype g, Rational)] -> Character m -> Rand g (Character m)
-addFeat archetypes chr = error "addFeat" {--
+addFeat archetypes chr = error "addFeat: not implemented yet" {--
   pick pickFeat archetypes chr >>= \feat ->
   if hasFeat feat chr && not isCumulable feat
     -- TODO: recursion limitation
@@ -232,22 +232,22 @@ addFeat archetypes chr = error "addFeat" {--
 -- feats :: Set Feat ? Map Feat FeatInstance ?
 
 addAbility :: [(Archetype g, Rational)] -> Character m -> Rand g (Character m)
-addAbility = error "addAbility"
+addAbility = error "addAbility: not implemented yet"
 
 pick :: (Archetype g -> Character m -> m (Rand g a)) -> [(Archetype g, Rational)] -> Character m -> Rand g (m a)
-pick = error "pick"
+pick = error "pick: not implemented yet"
 
 convertFavBonus :: FavBonus -> (Integer, Integer)
-convertFavBonus = error "convertFavBonus"
+convertFavBonus = error "convertFavBonus: not implemented yet"
 
 rollDice :: Integer -> Rand g Integer
-rollDice = error "rollDice"
+rollDice = error "rollDice: not implemented yet"
 
 abilityModifier :: Ability -> Character m -> Integer
-abilityModifier = error "abilityModifier"
+abilityModifier = error "abilityModifier: not implemented yet"
 
 classLvlUp :: Class -> [(Archetype g, Rational)] -> Character m -> Rand g (Character m)
-classLvlUp = error "classLvlup"
+classLvlUp = error "classLvlup: not implemented yet"
 
 addLvls ci1 ci2 = ci2 { lvl = lvl ci1 + lvl ci2 }
 
@@ -279,10 +279,10 @@ addLevel archetypes chr = -- {{{
   classLvlUp (runIdentity incCls) archetypes chr -- }}}
 
 getSkillLvl :: Skill -> Character m -> m Integer
-getSkillLvl = error "getSkillLvl"
+getSkillLvl = error "getSkillLvl: not implemented yet"
 
 addRank :: SkillInstance -> SkillInstance -> SkillInstance
-addRank = error "addRank"
+addRank = error "addRank: not implemented yet"
 
 addSkill 0 archetypes chr = return chr
 addSkill try archetypes chr =

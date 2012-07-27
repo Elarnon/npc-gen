@@ -1,11 +1,9 @@
 module Pathfinder.Skill
   ( Skill (..)
-  , SkillInstance
+  , SkillInstance (..)
   , defaultSkills
   , makeInstance
-  , addRank
-  , bonus
-  , ranks
+  , skAdd
   ) where
 
 import Pathfinder.Abilities
@@ -34,5 +32,6 @@ defaultSkills = Map.empty
 makeInstance :: Integer -> SkillInstance
 makeInstance i = SkillInstance { ranks = i , bonus = 0 }
 
-addRank :: SkillInstance -> SkillInstance -> SkillInstance
-addRank sk1 sk2 = sk2 { ranks = ranks sk1 + ranks sk2 }
+skAdd :: SkillInstance -> SkillInstance -> SkillInstance
+skAdd sk1 sk2 =
+  SkillInstance { ranks = ranks sk1 + ranks sk2, bonus = bonus sk1 + bonus sk2 }

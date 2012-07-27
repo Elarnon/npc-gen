@@ -1,8 +1,7 @@
 module Pathfinder.Class
   ( Class (..)
-  , ClassInstance 
-  , newInstance
-  , lvl
+  , ClassInstance (..)
+  , clsAddLevels
   , defaultClasses
   ) where
 
@@ -15,18 +14,18 @@ type Text = T.Text
 data Class = Class
   { clsName :: Text
   , clsSkills :: Integer
-  , life :: Integer
-  , getHpDice :: Integer
+  , clsLife :: Integer
+  , clsHpDice :: Integer
   }
   deriving (Eq, Show, Ord)
 
 data ClassInstance = ClassInstance
-  { lvl :: Integer
+  { clsLevel :: Integer
   }
   deriving (Eq, Show)
 
-newInstance :: Integer -> ClassInstance
-newInstance i = ClassInstance { lvl = i }
+clsAddLevels :: ClassInstance -> ClassInstance -> ClassInstance
+clsAddLevels c c' = ClassInstance { clsLevel = clsLevel c + clsLevel c' }
 
 defaultClasses :: Map Class ClassInstance
 defaultClasses = Map.empty

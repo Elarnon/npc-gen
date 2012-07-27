@@ -1,0 +1,11 @@
+Name:           npcGen
+Version:        0.1
+Synopsis:       Pathfinder NPC Generator
+License:        BSD3
+Build-Type:     Simple
+Cabal-version:  >= 1.2
+
+executable npc-gen
+  build-depends:   base, transformers, MonadRandom, containers, text, mtl, MaybeT
+  main-is:         Main.hs
+  hs-source-dirs:  src/

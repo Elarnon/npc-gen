@@ -6,6 +6,6 @@ Build-Type:     Simple
 Cabal-version:  >= 1.2
 
 executable npc-gen
-  build-depends:   base, transformers, MonadRandom, containers, text, mtl, MaybeT
+  build-depends:   base, transformers, MonadRandom, containers, text, mtl, MaybeT, dependent-sum, dependent-map
   main-is:         Main.hs
   hs-source-dirs:  src/

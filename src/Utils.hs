@@ -5,14 +5,14 @@ module Utils
   , unDecorate
   , mapD
   , runD
+  , mkD
   ) where
 
 import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Random
+import Data.Text (Text)
 import qualified Data.Text as T
-
-type Text = T.Text
 
 data Decorator a = Decorator
   { ident :: Text
@@ -26,8 +26,8 @@ data Decorated a = Decorated
   , decoration :: [Decorator a]
   }
 
-mkD :: a -> Decorated a
-mkD d = Decorated d d []
+mkD :: a -> [Decorator a] -> Decorated a
+mkD d ds = mapDecorators (const ds) $ Decorated d d []
 
 mapD :: (a -> b) -> Decorated a -> b
 mapD f = f . computed

@@ -1,0 +1,61 @@
+{-# LANGUAGE TypeFamilies #-}
+module Pathfinder.Class
+  ( Class (..)
+  , ClassInstance (..)
+  , bab, fort, will, refl
+  , incClass
+  , clsAddLevels
+  , defaultClasses
+  ) where
+
+import qualified Data.Text as T
+import qualified Data.Map as Map
+
+type Map = Map.Map
+type Text = T.Text
+
+data Class = Class
+  { clsName :: Text
+  , clsSkills :: Integer
+  , clsLife :: Integer
+  , clsHpDice :: Integer
+  }
+  deriving (Eq, Show, Ord)
+
+data ClassInstance = ClassInstance
+  { clsLevel :: Integer
+  }
+  deriving (Eq, Show)
+
+clsAddLevels :: ClassInstance -> ClassInstance -> ClassInstance
+clsAddLevels c c' = ClassInstance { clsLevel = clsLevel c + clsLevel c' }
+
+defaultClasses :: Map Class ClassInstance
+defaultClasses = Map.empty
+
+incClass :: a -> Class -> IncClass a -> IncClass b
+incClass = undefined
+
+data BAB
+data Will
+data Fort
+data Refl
+
+type family IncClass a :: *
+
+type instance IncClass BAB = Integer
+type instance IncClass Will = Integer
+type instance IncClass Fort = Integer
+type instance IncClass Refl = Integer
+
+bab :: BAB
+bab = undefined
+
+will :: Will
+will = undefined
+
+fort :: Fort
+fort = undefined
+
+refl :: Refl
+refl = undefined

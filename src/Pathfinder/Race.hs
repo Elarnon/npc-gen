@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes, DeriveDataTypeable, StandaloneDeriving, KindSignatures, FlexibleInstances #-}
+{-# LANGUAGE RankNTypes, DeriveDataTypeable, FlexibleInstances #-}
 module Pathfinder.Race
   ( Race 
   , raceSize
@@ -6,7 +6,7 @@ module Pathfinder.Race
   ) where
 
 import Pathfinder.Misc
-import Pathfinder.Character
+import Pathfinder.NewCharacter
 import qualified Control.Monad.Random as Rand
 import Control.Arrow
 import Data.Data

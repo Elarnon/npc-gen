@@ -1,6 +1,7 @@
 {-# LANGUAGE RankNTypes, FlexibleInstances, MultiParamTypeClasses, FlexibleContexts #-}
 
-module Pathfinder.Character
+module Pathfinder.Character where
+{-
   ( Character (..)
   , chrLevel
   , chrUpdateAbility
@@ -57,4 +58,4 @@ chrUpdateAbility f a chr =
   chr { chrAbilities = abUpdateAbility f a $ chrAbilities chr }
 
 chrAbilityModifier :: Ability -> Character -> Integer
-chrAbilityModifier a = abModifier a . chrAbilities
+chrAbilityModifier a = abModifier a . chrAbilities -}

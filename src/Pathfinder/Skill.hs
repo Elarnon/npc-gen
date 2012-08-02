@@ -47,6 +47,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Set (Set)
 
+-- The datatype for a skill. Nothing to see here, really.
 data Skill = Skill
   { skName :: Text
   , requireTraining :: Bool
@@ -54,6 +55,8 @@ data Skill = Skill
   }
   deriving (Eq, Show, Ord)
 
+-- The instance associated with a skill
+-- bonus should now be computed on the fly
 data SkillInstance = SkillInstance
   { ranks :: Integer
   -- , bonus :: Integer
@@ -61,7 +64,7 @@ data SkillInstance = SkillInstance
   deriving (Eq, Show)
 
 allSkills :: Set Skill
-allSkills = undefined
+allSkills = undefined -- TODO
 
 makeInstance :: Integer -> SkillInstance
 makeInstance i = SkillInstance { ranks = i {-, bonus = 0-} }

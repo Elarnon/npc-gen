@@ -22,101 +22,10 @@ import Pathfinder.NewCharacter
 import Pathfinder.Archetype
 import Utils
 
-{-
-data family CKey k :: *
 
-data instance CKey Race = CRace
-
-data CUpdateKey m a where
-  CULife :: CUpdateKey m (Character -> m Integer)
-
-data CKey a where
-  CUpdateKey :: CUpdateKey m (Character -> m a) -> CKey a
-  CRace :: CKey Race
-
-data WrapTyCon t tag a = Wrapped t (tag a)
-
-instance (Eq t, GEq tag) => GEq (WrapTyCon t tag) where
-  geq (Wrapped ty tag) (Wrapped ty' tag') =
-    if ty == ty' then geq tag tag' else Nothing
-
-instance (Ord t, GCompare tag) => GCompare (WrapTyCon t tag) where
-  gcompare (Wrapped ty tag) (Wrapped ty' tag') =
-    case compare ty ty' of
-      EQ -> gcompare tag tag'
-      LT -> GLT
-      GT -> GGT
-
-data KeyWithD a where
-  KeyWithD :: CKey a -> [CDecorator a] -> KeyWithF a
-
-data Character = Character { getChr :: Decorated (DMap CKey) }
--}
--- To construct a character I need
--- 1) default values i.e. CKey a -> a
--- 2) archetypes
-{-
--- Now, archetypes are what ?
--- You must say things like
--- « ok boy I want to do *that* »
--- so basically
--- they are Character -> CKey a ?
--- nah.
--- I should also have a DKey
--- and archetypes would be DKey -> Maybe (Character -> Character)
--- Ok now i have one last problem
--- that is hrrm
--- what
--- oh yeah
--- i have to distinguish default values /= updates
--- so
--- basically, i have a "CMap CKey" for default values
--- and a "CMap (b -> CKey {{ Character -> m b }})
--}
-
-
-randFromList :: MonadRandom m => [(a, Rational)] -> m (a, [(a, Rational)])
-randFromList = undefined
-
-pick :: (MonadRandom m, ArchTag t) =>
-  [(Archetype m, Rational)] -> t a -> DMap CKey -> m (Maybe a)
-pick []         _ _    = return Nothing
-pick archetypes k dmap =
-  randFromList archetypes >>= \(archetype,  archs) ->
-  archPickValue archetype k dmap >>= \val ->
-  case val of
-    Just x -> return $ Just x
-    Nothing -> pick archs k dmap
-
-combineArchs :: MonadRandom m => [(Archetype m, Rational)] -> Archetype m
-combineArchs archs = Archetype $ pick archs
-
-pickN :: (ArchTag t, MonadRandom m) =>
-  Archetype m -> t a -> Integer -> DMap CKey -> m [a]
-pickN arch k nb dmap =
-  if nb <= 0
-    then return []
-    else liftM2 (++)
-          (liftM maybeToList $ archPickValue arch k dmap)
-          (pickN arch k (nb-1) dmap)
--- archPickValue :: Archetype m -> CKey a -> DMap CKey -> m (Maybe a)
-
+-- Bad name, conflicts with Control.Monad.State
 get :: WithDefault a => CKey a -> DMap CKey -> a
 get k dmap = maybeDefault $ DMap.lookup k dmap
-
-class WithDefault a where
-  defaultValue :: a
-
-instance WithDefault (Map k a) where
-  defaultValue = Map.empty
-
-maybeDefault :: WithDefault a => Maybe a -> a
-maybeDefault (Just x) = x
-maybeDefault Nothing = defaultValue
-
-pickDefault :: (MonadRandom m, WithDefault a, ArchTag t) =>
-  Archetype m -> t a -> DMap CKey -> m a
-pickDefault arch k dmap = liftM maybeDefault $ archPickValue arch k dmap
 
 -- Creates a level-0 character
 createCharacter :: MonadRandom m =>
@@ -142,11 +51,11 @@ chrLevel dmap = Map.foldr (\c i -> clsLevel c + i) 0 $ get CClasses dmap
 
 incFeat :: MonadRandom m =>
   Feat -> Archetype m -> Character -> m Character
-incFeat = undefined
+incFeat = error "incFeat NIY"
 
 incAbility :: MonadRandom m =>
   Archetype m -> Character -> Ability -> m Character
-incAbility = undefined
+incAbility = error "incAbility NIY"
 
 chrAbilityModifier :: Ability -> DMap CKey -> Integer
 chrAbilityModifier ab dmap =
@@ -208,12 +117,8 @@ levelUp arch chr =
                     . DMap.insertWith' (+) CWill (incClass incCls icWill lvl)
                     . DMap.insertWith' (+) CRefl (incClass incCls icRefl lvl)
             }
-      in incClassSpecials incCls lvl arch chr
+      in liftM Just $ incClass incCls ICSpecial lvl arch chr
 -- TODO: Spells
-
-incClassSpecials :: (MonadRandom m, Class c) =>
-  c -> Integer -> Archetype m -> Character -> m (Maybe Character)
-incClassSpecials = undefined
 
 convertFavBonus :: FavBonus -> (Integer, Integer)
 convertFavBonus BonusHp = (0, 1)
@@ -221,57 +126,7 @@ convertFavBonus BonusSkill = (1, 0)
 
 rollDice :: MonadRandom m => Integer -> m Integer
 rollDice d = getRandomR (1, d)
-{-
-hasFeat :: Feat -> Character -> Bool
-hasFeat ft = Set.member ft . chrFeats
 
-addFeat :: MonadRandom m =>
-  [(Archetype m, Rational)] -> CharacterD -> m CharacterD
-addFeat archetypes chr =
-  pick pickNewFeat archetypes (runD chr) >>= \feat ->
-  if hasFeat feat `mapD` chr
-    then return chr -- TODO: pick another one
-    else return . decorate chr $ Decorator
-          { ident = T.pack $ "Add feat " ++ show feat
-          , fun = \chr -> chr { chrFeats = Set.insert feat $ chrFeats chr }
-          }
-
-increaseAbility :: MonadRandom m =>
-  [(Archetype m, Rational)] -> CharacterD -> m CharacterD
-increaseAbility archetypes chr =
-  pick pickNewAbility archetypes (runD chr) >>= \ab ->
-  return . decorate chr $ Decorator
-    { ident = undefined -- TODO "Increase ability " ++ show ab
-    , fun = chrUpdateAbility (+1) ab
-    }
-
-
--- TODO: rewrite that shit so that it is readable
-pickN :: MonadRandom m =>
-  (a -> b -> [c] -> m c) -> Integer -> [(a, Rational)] -> b -> m [c]
-pickN picker nb args1 arg2 = pickN' picker nb args1 arg2 []
-  where
-    pickN' picker 0 args1 arg2 arg3 = return arg3
-    pickN' picker n args1 arg2 arg3 =
-      pick (\a1 a2 -> picker a1 a2 arg3) args1 arg2 >>= \a3 ->
-      pickN' picker (n-1) args1 arg2 (a3:arg3)
-
-
-chrClsLvlUp :: MonadRandom m =>
-  Class -> [(Archetype m, Rational)] -> CharacterD -> m CharacterD
-chrClsLvlUp = error "chrClsLvlUp :: not implemented"
-
-
-{-
-getSkillRanks :: Monad m => Skill -> Character -> m Integer
-getSkillRanks sk chr =
-  skills chr >>= \skls ->
-  return . fromMaybe 0 . liftM ranks $ Map.lookup sk skls
-
-updateSkillBonus :: Character m -> Character m
-updateSkillBonus = \x -> x-- TODO: error "updateSkillBonus: not implemented yes"
--}
--}
 main :: IO ()
 main = return ()
   {--let chr = createCharacter [(dumbArchetype, 1)] emptyChr 10 in

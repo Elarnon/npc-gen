@@ -10,6 +10,8 @@ module Leibniz
 
 import Data.GADT.Compare
 
+-- Fun stuff with equality
+
 -- Lowercase reflexivity for consistency
 refl :: a := a
 refl = Refl

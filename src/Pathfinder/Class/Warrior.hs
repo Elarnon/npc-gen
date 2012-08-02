@@ -1,16 +1,17 @@
+{-# LANGUAGE OverloadedStrings, GADTs #-}
 module Pathfinder.Class.Warrior where
 
 import Pathfinder.Class
 import Pathfinder.Archetype
 import Pathfinder.NewCharacter
+import Control.Monad.Random
 
 data Warrior = Warrior
 
 instance Class Warrior where
   clsName Warrior = "Warrior"
-  clsLife Warrior = 10
-  clsHpDice Warrior = 10
-  clsSkills Warrior = 10
+  clsHpDice Warrior = 10 -- TODO
+  clsSkills Warrior = 10 -- TODO
   incClass Warrior c =
     case c of
       ICBAB -> warBAB
@@ -41,5 +42,5 @@ warRefl i =
     then 1
     else 0
 
-warSpecial :: Integer -> 
+warSpecial :: MonadRandom m => Integer -> Archetype m -> Character -> m Character
 warSpecial _ = undefined

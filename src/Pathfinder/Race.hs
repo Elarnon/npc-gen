@@ -15,8 +15,11 @@ import Data.Functor.Identity
 
 type RandT = Rand.RandT
 
--- deriving instance Typeable (Character Identity)
-
+-- Pretty straightforward
+-- TODO: there should be *two* types, one that currently implement the race
+-- and one that is just a "token" of an identifier, in order to pattern-match
+-- and stuff.
+-- TODO: raceSize might be useless as of now.
 data Race
   = Race
   { raceSize :: Size
@@ -24,6 +27,7 @@ data Race
   }
 -- deriving (Data, Typeable)
 
+-- Old stuff I used to think about
 {--
 raceAdjust :: Monad m =>
   Race -> Character m -> RandT g m (Character m)

@@ -6,13 +6,19 @@ module Utils
   , mapD
   , runD
   , mkD
+  , WithDefault (..)
+  , maybeDefault
   ) where
 
 import Control.Monad.Reader
+import Data.Map (Map)
+import qualified Data.Map as Map
 import Control.Monad.State
 import Control.Monad.Random
 import Data.Text (Text)
 import qualified Data.Text as T
+
+-- Decorators for characters. May be kind of useless.
 
 data Decorator a = Decorator
   { ident :: Text
@@ -79,3 +85,12 @@ instance MonadRandom m => MonadRandom (DecoratorT d m) where
   getRandomRs = lift . getRandomRs
   -}
 
+class WithDefault a where
+  defaultValue :: a
+
+instance WithDefault (Map k a) where
+  defaultValue = Map.empty
+
+maybeDefault :: WithDefault a => Maybe a -> a
+maybeDefault (Just x) = x
+maybeDefault Nothing = defaultValue

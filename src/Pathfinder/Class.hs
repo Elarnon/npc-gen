@@ -2,8 +2,9 @@
 module Pathfinder.Class
   ( Class
   , SomeClass
-  , clsName , clsLife , clsHpDice, clsSkills
+  , clsName , clsHpDice, clsSkills
   , ClassInstance (..)
+  , IncClass (..)
   , icBAB, icFort, icWill, icRefl
   , incClass
   , clsAddLevels
@@ -15,36 +16,22 @@ import qualified Data.Text as T
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Dependent.Map (DMap)
+import Control.Monad.Random
+import {-# SOURCE #-} Pathfinder.Archetype
 import {-# SOURCE #-} Pathfinder.NewCharacter
 
--- TODO FIXME
-{-
-data Class = Class
-  { clsName :: Text
-  , clsSkills :: Integer
-  , clsLife :: Integer
-  , clsHpDice :: Integer
-  , incClass :: forall a. IncClass a -> Integer -> a
-  }
-
-instance Show Class where
-  show = show . clsName
-
-instance Eq Class where
-  c == c' = clsName c == clsName c'
-
-instance Ord Class where
-  compare c c' = compare (clsName c) (clsName c')
--}
-
+-- A class representing classes (oh yeah)
 class Class c where
-  -- data ClassSpecial c :: *
   clsName :: c -> Text
-  clsLife :: c -> Integer
   clsHpDice :: c -> Integer
   clsSkills :: c -> Integer
+  -- Function to increase anything that a class can increase
+  -- See the IncClass class
   incClass :: c -> IncClass a -> Integer -> a
 
+-- Existential wrapper around a class. This more or less allow to define
+-- more class by creating a type plus a Class instance, which I'm not sure
+-- is really better than a record but whatever.
 data SomeClass = forall c. Class c => SomeClass c
 
 instance Eq SomeClass where
@@ -55,7 +42,6 @@ instance Ord SomeClass where
 
 instance Class SomeClass where
   clsName (SomeClass c) = clsName c
-  clsLife (SomeClass c) = clsLife c
   clsHpDice (SomeClass c) = clsHpDice c
   clsSkills (SomeClass c) = clsSkills c
   incClass (SomeClass c) = incClass c
@@ -71,15 +57,15 @@ clsAddLevels c c' = ClassInstance { clsLevel = clsLevel c + clsLevel c' }
 defaultClasses :: Map SomeClass ClassInstance
 defaultClasses = Map.empty
 
+-- Data that we can ask a class to update
 data IncClass a where
   ICBAB     :: IncClass Integer
   ICFort    :: IncClass Integer
   ICWill    :: IncClass Integer
   ICRefl    :: IncClass Integer
-  ICSpecial :: IncClass (Character -> Character)
+  ICSpecial :: MonadRandom m => IncClass (Archetype m -> Character -> m (Character))
 
 icBAB = ICBAB
 icFort = ICFort
 icWill = ICWill
 icRefl = ICRefl
-icSpecial = ICSpecial

@@ -46,7 +46,7 @@ instance GEq t => GEq (Wrap f t) where
   geq (Wrapped k) (Wrapped k') = fmap tyCon $ geq k k'
 
 -- Updatable keys - i.e. keys we can ask archetypes
--- Maybe AKey would then be better ?
+-- TODO: Maybe AKey would then be better ?
 data CUpdatable a where
   UClass :: CUpdatable SomeClass
   USkill :: CUpdatable Skill
@@ -69,6 +69,7 @@ instance Dip CUpdatable Int where
   dip UFeat = 2
   dip UAbility = 3
 
+-- Keys that constitute a character
 data CKey a where
   CLife :: CKey Integer
   CRace :: CKey Race
@@ -93,7 +94,6 @@ instance Dip CKey Int where
   dip CLife = 1
 
 -- Wrapper to make UpdatableKeys compatibles with DSum and DMap
-
 data WrapUpdate c m a where
   WCUK :: CUpdatable a -> WrapUpdate c m (c -> m a)
 

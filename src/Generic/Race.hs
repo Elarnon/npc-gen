@@ -1,19 +1,15 @@
 {-# LANGUAGE RankNTypes, DeriveDataTypeable, FlexibleInstances #-}
-module Pathfinder.Race
+module Generic.Race
   ( Race 
   , raceSize
   , raceAdjust
   ) where
 
-import Pathfinder.Misc
-import Pathfinder.NewCharacter
+import Generic.Misc
+import Generic.Character
 import qualified Control.Monad.Random as Rand
-import Control.Arrow
-import Data.Data
-import Data.Dynamic
-import Data.Functor.Identity
 
-type RandT = Rand.RandT
+-- TODO: implement in a similar fashion to Class
 
 -- Pretty straightforward
 -- TODO: there should be *two* types, one that currently implement the race

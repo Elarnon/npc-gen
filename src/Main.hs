@@ -1,39 +1,36 @@
 {-# LANGUAGE OverloadedStrings, GADTs, Rank2Types #-}
-import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Set (Set)
-import qualified Data.Set as Set
-import Data.Functor.Identity
 import Data.Maybe
 import Control.Monad
-import Control.Monad.Trans
 import Control.Monad.Random
-import Pathfinder.Abilities as Abilities
-import Pathfinder.Misc
-import Pathfinder.Race as Race
-import Pathfinder.Skill as Skill
-import Pathfinder.Feat as Feat
-import Pathfinder.Class as Class
+import Generic.Abilities as Abilities
+import Generic.Misc
+import Generic.Race as Race
+import Generic.Skill as Skill
+import Generic.Feat as Feat
+import Generic.Class as Class
 import Data.Dependent.Map (DMap)
 import qualified Data.Dependent.Map as DMap
-import Pathfinder.NewCharacter
-import Pathfinder.Archetype
+import Generic.Character
+import Generic.Archetype
 import Utils
 
-
--- Bad name, conflicts with Control.Monad.State
-get :: WithDefault a => CKey a -> DMap CKey -> a
-get k dmap = maybeDefault $ DMap.lookup k dmap
+applyRace :: Archetype m -> Race -> Character -> m Character
+applyRace = undefined
 
 -- Creates a level-0 character
 createCharacter :: MonadRandom m =>
   Archetype m -> DMap (Wrap Maybe CKey) -> m Character
-createCharacter arch base =
-  DMap.foldrWithKey (pickInitial arch) (return DMap.empty) base >>= \chrMap ->
-  return $ mkD chrMap [] -- TODO : race & stuff
+createCharacter arch base  =
+  -- Pick simple values that doesn't require decorators
+  DMap.foldrWithKey (pickInitial arch) (return DMap.empty) base >>= \cMap ->
+  -- Don't forget the race. This may be ugly, but…
+  (case DMap.lookup CRace cMap of
+    Just r -> applyRace arch r
+    Nothing -> return) $ mkD cMap []
     where
+      -- Insert initial values with a default
       pickInitial :: MonadRandom m => 
         Archetype m -> Wrap Maybe CKey v -> v -> m (DMap CKey) -> m (DMap CKey)
       pickInitial a (Wrapped k) v mChr =
@@ -46,8 +43,10 @@ createCharacter arch base =
               Just x -> return $ DMap.insert k x chr
               Nothing -> return chr
 
-chrLevel :: DMap CKey -> Integer
-chrLevel dmap = Map.foldr (\c i -> clsLevel c + i) 0 $ get CClasses dmap
+chrLevel :: Character -> Integer
+chrLevel chr =
+  Map.foldr (\c i -> clsLevel c + i) 0 . fromMaybe Map.empty
+  $ DMap.lookup CClasses `mapD` chr
 
 incFeat :: MonadRandom m =>
   Feat -> Archetype m -> Character -> m Character
@@ -57,17 +56,16 @@ incAbility :: MonadRandom m =>
   Archetype m -> Character -> Ability -> m Character
 incAbility = error "incAbility NIY"
 
-chrAbilityModifier :: Ability -> DMap CKey -> Integer
-chrAbilityModifier ab dmap =
-  case DMap.lookup (CAbility ab) dmap of
-    Nothing -> 0
-    Just x -> (x - 10) `div` 2
+chrAbilityModifier :: Ability -> Character -> Integer
+chrAbilityModifier ab chr =
+  maybe 0 (\x -> (x - 10) `div` 2) $ DMap.lookup (CAbility ab) `mapD` chr
 
 -- Increase some attribute of the character
+-- TODO: this function is too big and should maybe be splitted up
 levelUp :: MonadRandom m =>
   Archetype m -> Character -> m (Maybe Character)
 levelUp arch chr =
-  let lvl = 1 + chrLevel `mapD` chr in
+  let lvl = 1 + chrLevel chr in
   -- Add feats when needed
   (if lvl `mod` 2 == 1 || lvl == 1
     then archPickValue arch UFeat `mapD` chr >>= \v ->
@@ -93,13 +91,13 @@ levelUp arch chr =
         else return (0, 0)) >>= \(bSk, bHp) ->
       -- Roll HP dice
       rollDice (clsHpDice incCls) >>= \hpInc ->
-      let intMod = chrAbilityModifier INT `mapD` chr
+      let intMod = chrAbilityModifier INT chr
           nbSkills = clsSkills incCls + intMod + bSk
-          conMod = chrAbilityModifier CON `mapD` chr
+          conMod = chrAbilityModifier CON chr
       in pickN arch USkill nbSkills `mapD` chr >>= \skls ->
       -- TODO: check valid, etc.
       let nchr = decorate chr Decorator
-            { ident = "Level up class"
+            { ident = T.concat ["Generic class[", clsName incCls, "] level up"]
             , fun = DMap.insertWith'
                       (Map.unionWith clsAddLevels)
                       CClasses
@@ -119,10 +117,6 @@ levelUp arch chr =
             }
       in liftM Just $ incClass incCls ICSpecial lvl arch chr
 -- TODO: Spells
-
-convertFavBonus :: FavBonus -> (Integer, Integer)
-convertFavBonus BonusHp = (0, 1)
-convertFavBonus BonusSkill = (1, 0)
 
 rollDice :: MonadRandom m => Integer -> m Integer
 rollDice d = getRandomR (1, d)

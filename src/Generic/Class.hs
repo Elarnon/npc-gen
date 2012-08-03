@@ -1,24 +1,20 @@
 {-# LANGUAGE GADTs, RankNTypes #-}
-module Pathfinder.Class
-  ( Class
+module Generic.Class
+  ( Class (..)
   , SomeClass
-  , clsName , clsHpDice, clsSkills
   , ClassInstance (..)
   , IncClass (..)
   , icBAB, icFort, icWill, icRefl
-  , incClass
   , clsAddLevels
   , defaultClasses
   ) where
 
 import Data.Text (Text)
-import qualified Data.Text as T
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Dependent.Map (DMap)
 import Control.Monad.Random
-import {-# SOURCE #-} Pathfinder.Archetype
-import {-# SOURCE #-} Pathfinder.NewCharacter
+import Generic.Archetype
+import Generic.Character
 
 -- A class representing classes (oh yeah)
 class Class c where

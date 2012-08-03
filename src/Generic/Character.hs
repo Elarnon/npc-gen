@@ -1,5 +1,5 @@
 {-# LANGUAGE GADTs, FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, FunctionalDependencies, ExistentialQuantification, StandaloneDeriving #-}
-module Pathfinder.NewCharacter
+module Generic.Character
   {-( CUpdatableKey
   , CKey
   )-}
@@ -9,20 +9,18 @@ import Data.GADT.Compare
 import Data.Dependent.Map
 import Leibniz
 import Utils
-import Pathfinder.Class
-import Pathfinder.Feat
-import Pathfinder.Skill
-import Pathfinder.Abilities
-import Pathfinder.Misc
-import {-# SOURCE #-} Pathfinder.Race
+import {-# SOURCE #-} Generic.Class
+import Generic.Feat
+import Generic.Skill
+import Generic.Abilities
+import Generic.Misc
+import {-# SOURCE #-} Generic.Race
 import Data.Map (Map)
 
+-- TODO: newtype
 type Character = Decorated (DMap CKey)
 
-{- class WrapEq a b where
-  maybeEqual :: a -> b -> Maybe (a := b)
-  -}
-
+-- Not sure if useful…
 class Ord o => Dip t o | t -> o where
   dip :: t a -> o
 
@@ -34,8 +32,6 @@ class Ord o => Dip t o | t -> o where
 --  ; DMap CKey : default values
 --  ; Map DKey (Character -> Character) : decorators
 --  }
-
--- TODO: use DSum
 
 data Forget t = forall a. Forget !(t a)
 
@@ -54,6 +50,9 @@ data CUpdatable a where
   UAbility :: CUpdatable Ability
   UFavBonus :: SomeClass -> CUpdatable FavBonus
 
+data Any t a where
+  Any :: t -> Any t a
+
 -- TODO: deriving GEq
 instance GEq CUpdatable where
   geq UClass UClass = Just Refl
@@ -68,6 +67,7 @@ instance Dip CUpdatable Int where
   dip USkill = 1
   dip UFeat = 2
   dip UAbility = 3
+  dip _ = error "dip ! NIY"
 
 -- Keys that constitute a character
 data CKey a where
@@ -92,6 +92,7 @@ instance GEq CKey where
 instance Dip CKey Int where
   dip CRace = 0
   dip CLife = 1
+  dip _ = error "dip! NIY"
 
 -- Wrapper to make UpdatableKeys compatibles with DSum and DMap
 data WrapUpdate c m a where

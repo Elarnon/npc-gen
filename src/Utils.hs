@@ -10,16 +10,15 @@ module Utils
   , maybeDefault
   ) where
 
-import Control.Monad.Reader
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Control.Monad.State
-import Control.Monad.Random
 import Data.Text (Text)
-import qualified Data.Text as T
 
 -- Decorators for characters. May be kind of useless.
 
+-- These will later be extended with something about their order
+-- in the list, and a better ID type. For now, use the ident field
+-- for description. Yes, that's weird.
 data Decorator a = Decorator
   { ident :: Text
   -- , desc :: Text -- Maybe ?

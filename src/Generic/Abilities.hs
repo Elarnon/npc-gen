@@ -1,4 +1,4 @@
-module Pathfinder.Abilities
+module Generic.Abilities
   ( Abilities
   , Ability (..)
   , abSetAbility
